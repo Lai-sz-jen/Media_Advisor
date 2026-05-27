@@ -1,0 +1,73 @@
+/* MEDIA ADVISOR: a demonstration rule-based expert system
+Rule: 1
+if the environment is papers
+or the environment is manuals
+or the environment is documents
+or the environment is textbooks
+then the stimulus_situation is verbal
+Rule: 2
+if the environment is pictures
+or the environment is illustrations
+or the environment is photographs
+or the environment is diagrams
+then the stimulus_situation is visual
+Rule: 3
+if the environment is machines
+or the environment is buildings
+or the environment is tools
+then the stimulus_situation is ‘physical object’
+Rule: 4
+if the environment is numbers
+or the environment is formulas
+or the environment is ‘computer programs’
+then the stimulus_situation is symbolic
+Rule: 5
+if the job is lecturing
+or the job is advising
+or the job is counselling
+then the stimulus_response is oral
+Rule: 6
+if the job is building
+or the job is repairing
+or the job is troubleshooting
+then the stimulus_response is ‘hands-on’
+Rule: 7
+if the job is writing
+or the job is typing
+or the job is drawing
+then the stimulus_response is documented
+Rule: 8
+if the job is evaluating
+or the job is reasoning
+or the job is investigating
+then the stimulus_response is analytical
+Rule: 9
+if the stimulus_situation is ‘physical object’
+and the stimulus_response is ‘hands-on’
+and feedback is required
+then medium is workshop
+Rule: 10
+if the stimulus_situation is symbolic
+and the stimulus_response is analytical
+and feedback is required
+then medium is ‘lecture – tutorial’
+Rule: 11
+if the stimulus_situation is visual
+and the stimulus_response is documented
+and feedback is not required
+then medium is videocassette
+Rule: 12
+if the stimulus_situation is visual
+and the stimulus_response is oral
+and feedback is required
+then medium is ‘lecture – tutorial’
+Rule: 13
+if the stimulus_situation is verbal
+and the stimulus_response is analytical
+and feedback is required
+then medium is ‘lecture – tutorial’
+Rule: 14
+if the stimulus_situation is verbal
+and the stimulus_response is oral
+and feedback is required
+then medium is ‘role-play exercises’

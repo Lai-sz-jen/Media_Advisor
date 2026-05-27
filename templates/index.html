@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expert System - Media Advisor</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 50%, #1e1b4b 100%);
+            --card-bg: rgba(17, 24, 39, 0.65);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.35);
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.25);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+            overflow-x: hidden;
+        }
+
+        /* Decorative background blobs */
+        .blob {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.25;
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            top: 10%;
+            left: 15%;
+            background: var(--primary);
+            animation: float-slow 15s infinite alternate;
+        }
+
+        .blob-2 {
+            bottom: 10%;
+            right: 15%;
+            background: var(--accent);
+            animation: float-slow 20s infinite alternate-reverse;
+        }
+
+        @keyframes float-slow {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -50px) scale(1.1); }
+            100% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 580px;
+            z-index: 1;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .header {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group label svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper::after {
+            content: '';
+            position: absolute;
+            right: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 6px;
+            background-color: var(--text-secondary);
+            clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .select-wrapper:hover::after {
+            background-color: var(--text-primary);
+        }
+
+        select {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            padding-right: 2.5rem;
+            background: rgba(31, 41, 55, 0.5);
+            border: 1.5px solid var(--card-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            appearance: none;
+            -webkit-appearance: none;
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+            background: rgba(31, 41, 55, 0.8);
+        }
+
+        select option {
+            background: #111827;
+            color: var(--text-primary);
+            padding: 10px;
+        }
+
+        .btn-evaluate {
+            font-family: inherit;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border: none;
+            border-radius: 14px;
+            padding: 1.1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -10px var(--primary-glow);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-evaluate::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .btn-evaluate:hover::before {
+            left: 100%;
+        }
+
+        .btn-evaluate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -8px var(--primary-glow),
+                        0 0 15px 2px var(--accent-glow);
+        }
+
+        .btn-evaluate:active {
+            transform: translateY(1px);
+        }
+
+        .btn-evaluate:disabled {
+            background: #374151;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Result Area */
+        .result-container {
+            border-top: 1px solid var(--card-border);
+            padding-top: 1.5rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .result-container.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .result-box {
+            padding: 1.5rem;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .result-box.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+        }
+
+        .result-box.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .result-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .result-box.success .result-title {
+            color: var(--success);
+        }
+
+        .result-box.warning .result-title {
+            color: var(--warning);
+        }
+
+        .result-box.error .result-title {
+            color: var(--error);
+        }
+
+        .result-details {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer a:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>Media Advisor</h1>
+                <p>Expert Rule-Based Decision Engine</p>
+            </div>
+
+            <!-- Parameters Selection Form -->
+            <div class="form-group">
+                <label for="environment">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    Environment
+                </label>
+                <div class="select-wrapper">
+                    <select id="environment">
+                        <option value="" disabled selected>Select the environment...</option>
+                        <optgroup label="Verbal Situations">
+                            <option value="papers">Papers</option>
+                            <option value="manuals">Manuals</option>
+                            <option value="documents">Documents</option>
+                            <option value="textbooks">Textbooks</option>
+                        </optgroup>
+                        <optgroup label="Visual Situations">
+                            <option value="pictures">Pictures</option>
+                            <option value="illustrations">Illustrations</option>
+                            <option value="photographs">Photographs</option>
+                            <option value="diagrams">Diagrams</option>
+                        </optgroup>
+                        <optgroup label="Physical Objects">
+                            <option value="machines">Machines</option>
+                            <option value="buildings">Buildings</option>
+                            <option value="tools">Tools</option>
+                        </optgroup>
+                        <optgroup label="Symbolic Situations">
+                            <option value="numbers">Numbers</option>
+                            <option value="formulas">Formulas</option>
+                            <option value="computer programs">Computer Programs</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="job">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Job / Task Type
+                </label>
+                <div class="select-wrapper">
+                    <select id="job">
+                        <option value="" disabled selected>Select the job type...</option>
+                        <optgroup label="Oral Response">
+                            <option value="lecturing">Lecturing</option>
+                            <option value="advising">Advising</option>
+                            <option value="counselling">Counselling</option>
+                        </optgroup>
+                        <optgroup label="Hands-on Response">
+                            <option value="building">Building</option>
+                            <option value="repairing">Repairing</option>
+                            <option value="troubleshooting">Troubleshooting</option>
+                        </optgroup>
+                        <optgroup label="Documented Response">
+                            <option value="writing">Writing</option>
+                            <option value="typing">Typing</option>
+                            <option value="drawing">Drawing</option>
+                        </optgroup>
+                        <optgroup label="Analytical Response">
+                            <option value="evaluating">Evaluating</option>
+                            <option value="reasoning">Reasoning</option>
+                            <option value="investigating">Investigating</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="feedback">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    Feedback Requirement
+                </label>
+                <div class="select-wrapper">
+                    <select id="feedback">
+                        <option value="" disabled selected>Is feedback required?</option>
+                        <option value="required">Required</option>
+                        <option value="not required">Not Required</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="btnEvaluate" class="btn-evaluate" onclick="evaluateScenario()">
+                <div id="btnSpinner" class="spinner"></div>
+                <span id="btnText">Evaluate System</span>
+            </button>
+
+            <!-- Result Box -->
+            <div id="resultContainer" class="result-container">
+                <div class="result-label">Evaluation Result</div>
+                <div id="resultBox" class="result-box">
+                    <div id="resultTitle" class="result-title"></div>
+                    <div id="resultDetails" class="result-details"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Local Advisor Agent &bull; Powered by Gemini 2.5 Flash
+        </div>
+    </div>
+
+    <script>
+        async function evaluateScenario() {
+            const environment = document.getElementById('environment').value;
+            const job = document.getElementById('job').value;
+            const feedback = document.getElementById('feedback').value;
+
+            // Form Validation
+            if (!environment || !job || !feedback) {
+                showResult('warning', 'Incomplete Selections', 'Please select a value for all three parameters before running evaluation.');
+                return;
+            }
+
+            // UI State: Loading
+            const btn = document.getElementById('btnEvaluate');
+            const spinner = document.getElementById('btnSpinner');
+            const btnText = document.getElementById('btnText');
+            const resultContainer = document.getElementById('resultContainer');
+            
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.innerText = 'Evaluating...';
+            resultContainer.classList.remove('show');
+
+            try {
+                const response = await fetch('/evaluate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ environment, job, feedback })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok || !data.success) {
+                    showResult('error', 'Evaluation Error', data.error || 'Failed to retrieve response from expert engine.');
+                    return;
+                }
+
+                // Handle system response string
+                let rawResult = data.result;
+                if (!rawResult) {
+                    showResult('warning', 'No Recommendation', 'The evaluation ran successfully, but returned an empty response.');
+                    return;
+                }
+
+                // Clean the response markdown ticks if any, and try to parse
+                let parsedResult = null;
+                let isJson = false;
+                
+                try {
+                    let cleanedResult = rawResult.trim();
+                    if (cleanedResult.startsWith('```json')) {
+                        cleanedResult = cleanedResult.substring(7, cleanedResult.length - 3).trim();
+                    } else if (cleanedResult.startsWith('```')) {
+                        cleanedResult = cleanedResult.substring(3, cleanedResult.length - 3).trim();
+                    }
+                    
+                    parsedResult = JSON.parse(cleanedResult);
+                    isJson = true;
+                } catch(e) {
+                    // Not valid JSON or can't be cleaned/parsed, fallback to raw string display
+                }
+
+                if (isJson && parsedResult) {
+                    const recommendation = parsedResult.medium;
+                    if (recommendation && recommendation.toUpperCase() !== 'INSUFFICIENT DATA') {
+                        showResult('success', `Medium: ${recommendation}`, `The inference engine matched rules successfully. The recommended teaching/delivery medium is: <strong>${recommendation}</strong>.`);
+                    } else {
+                        showResult('warning', 'INSUFFICIENT DATA', 'The provided facts do not trigger any rules in the expert rulebase. Try changing your parameters.');
+                    }
+                } else {
+                    // Fallback to text match
+                    const trimmedResult = rawResult.trim();
+                    if (trimmedResult.includes('INSUFFICIENT DATA') || trimmedResult.toUpperCase() === 'INSUFFICIENT DATA') {
+                        showResult('warning', 'INSUFFICIENT DATA', 'The provided facts do not trigger any rules in the expert rulebase. Try changing your parameters.');
+                    } else {
+                        showResult('success', 'Recommendation Found', `Evaluation output: <pre style="font-family: inherit; font-size: 0.95rem; white-space: pre-wrap; margin-top: 5px;">${trimmedResult}</pre>`);
+                    }
+                }
+
+            } catch (error) {
+                console.error(error);
+                showResult('error', 'Network Connection Error', 'Could not establish connection to the Flask server. Make sure the server is running locally.');
+            } finally {
+                // UI State: Reset Button
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.innerText = 'Evaluate System';
+            }
+        }
+
+        function showResult(type, title, description) {
+            const container = document.getElementById('resultContainer');
+            const box = document.getElementById('resultBox');
+            const titleEl = document.getElementById('resultTitle');
+            const detailsEl = document.getElementById('resultDetails');
+
+            // Reset classes
+            box.className = 'result-box ' + type;
+
+            // SVGs based on message type
+            let iconSvg = '';
+            if (type === 'success') {
+                iconSvg = `<svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            } else if (type === 'warning') {
+                iconSvg = `<svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+            } else {
+                iconSvg = `<svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            }
+
+            titleEl.innerHTML = iconSvg + title;
+            detailsEl.innerHTML = description;
+
+            // Transition
+            container.style.display = 'flex';
+            setTimeout(() => {
+                container.classList.add('show');
+            }, 50);
+        }
+    </script>
+</body>
+</html>
