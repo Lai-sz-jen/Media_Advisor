@@ -1,6 +1,6 @@
 # Media_Advisor
-A simple implementation of expert system powered by LLM
+A simple implementation of expert system powered by LLM\n
 Gemini api key required!!
 
 Please save following text as ".env" file in the same path before running:
-"GEMINI_API_KEY"="your_OWN_api_key"
+GEMINI_API_KEY="your_OWN_api_key"
